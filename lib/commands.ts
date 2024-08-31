@@ -45,12 +45,4 @@ export const commands: Commands = {
 };
 
 // Banner
-export const BANNER = `
- __     __   ______   ______  ______  ______   ______   __    __   
-/\ \  _ \ \ /\  ___\ /\  == \/\__  _\/\  ___\ /\  == \ /\ "-./  \  
-\ \ \/ ".\ \\ \  __\ \ \  __<\/_/\ \/\ \  __\ \ \  __< \ \ \-./\ \ 
- \ \__/".~\_\\ \_____\\ \_____\ \ \_\ \ \_____\\ \_\ \_\\ \_\ \ \_\
-  \/_/   \/_/ \/_____/ \/_____/  \/_/  \/_____/ \/_/ /_/ \/_/  \/_/
-  
-Type 'help' to see the list of available commands.
-`;
+export const BANNER = `WEBTERM Type 'help' to see the list of available commands.`;

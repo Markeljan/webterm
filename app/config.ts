@@ -4,10 +4,9 @@ export const config = {
   name: "Anon Doe",
   ascii: "webterm",
   social: {
-    github: "github",
-    twitter: "twitter",
+    github: "markeljan",
+    twitter: "0xSoko",
   },
-  email: "markeljan19@gmail.com",
   ps1_hostname: "webterm",
   ps1_username: "anon",
   repo: "https://github.com/markeljan/webterm",
