@@ -13,8 +13,11 @@
         }
       },
       "style": {
-        "useImportType": "warn"
+        "useImportType": "off"
       }
     }
+  },
+  "files": {
+    "include": ["src/**/*.{ts,tsx,js,jsx,json,md,mdx}"]
   }
 }

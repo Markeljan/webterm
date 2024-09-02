@@ -17,9 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`bg-neutral-900 text-cyan-300 min-w-max text-xs md:min-w-full p-2 md:text-base ${martianMono.className}`}
-      >
+      <body className={`flex w-full bg-neutral-900 text-white text-xs md:text-sm p-2 ${martianMono.className}`}>
         {children}
       </body>
     </html>
