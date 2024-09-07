@@ -1,5 +1,8 @@
-import { BANNER, commands, isValidCommand } from "@/lib/commands";
 import { useCallback, useState } from "react";
+import { useAccount, useConnect } from "wagmi";
+
+import { BANNER, commands, isValidCommand } from "@/lib/commands";
+import { fhenix } from "@/lib/config-web3";
 
 export type HistoryItem = {
   type: "command" | "output";
@@ -11,6 +14,8 @@ export const useTerminal = () => {
   const [command, setCommand] = useState("");
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const { isConnected, address } = useAccount();
+  const { connectors, connect } = useConnect();
 
   const addToHistory = useCallback((item: HistoryItem) => {
     setHistory((prev) => [...prev, item]);
@@ -46,21 +51,28 @@ export const useTerminal = () => {
         addToHistory({ type: "command", value: "" });
       } else {
         addToHistory({ type: "command", value: trimmedCmd });
-        const args = trimmedCmd.split(" ");
-        const commandName = args[0].toLowerCase();
-
+        const [commandName, ...args] = trimmedCmd.split(" ");
         if (commandName === "clear") {
           clearOutput();
         } else if (isValidCommand(commandName)) {
-          const result = await commands[commandName](args.slice(1));
-          addToHistory({ type: "output", value: result });
+          if (commandName === "connect") {
+            if (!isConnected) {
+              connect({ connector: connectors[0], chainId: fhenix.id });
+              addToHistory({ type: "output", value: "Connecting..." });
+            } else {
+              addToHistory({ type: "output", value: "Already connected." });
+            }
+          } else {
+            const result = await commands[commandName](args);
+            addToHistory({ type: "output", value: result });
+          }
         } else {
           addToHistory({ type: "output", value: `command not found: ${commandName}` });
         }
       }
       setCommand("");
     },
-    [addToHistory, clearOutput]
+    [addToHistory, clearOutput, isConnected, connect, connectors]
   );
 
   const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {

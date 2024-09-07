@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS=--experimental-wasm-modules next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -11,8 +11,10 @@
   "dependencies": {
     "@vercel/postgres": "^0.9.0",
     "clsx": "^2.1.1",
+    "ethers": "^6.13.2",
+    "fhenixjs": "0.3.0",
     "nanoid": "^5.0.7",
-    "next": "14.2.7",
+    "next": "14.2.8",
     "react": "^18",
     "react-dom": "^18",
     "tailwind-merge": "^2.5.2",

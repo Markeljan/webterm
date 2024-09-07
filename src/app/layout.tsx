@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Martian_Mono } from "next/font/google";
 
 import "@/app/globals.css";
+import { Web3Provider } from "@/lib/web3-provider";
 
 const martianMono = Martian_Mono({ subsets: ["latin"] });
 
@@ -18,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`flex w-full bg-neutral-900 text-white text-xs md:text-sm p-2 ${martianMono.className}`}>
-        {children}
+        <Web3Provider>{children}</Web3Provider>
       </body>
     </html>
   );

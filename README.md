@@ -50,7 +50,7 @@ sequenceDiagram
 
 ## Getting Started
 
-- Visit [WebTerm](https://webterm.xyz) and connect your wallet.
+- Visit [WebTerm](https://webterm.app) and connect your wallet.
 - Register to store and access FHE encrypted files.
 - Upload files to IPFS and store the encrypted CIDs on the blockchain.
 - Setup public or private directories and files. Manage access permissions directly onchain.
