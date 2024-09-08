@@ -16,6 +16,14 @@ Access Control: Supports both public and private files/directories.
 Confidential String Storage: Demonstrates encrypted string storage and retrieval.
 Author Verification: Verify content creators without revealing identities.
 
+# [Youtube Demo](https://www.youtube.com/watch?v=v-gEywUzMeE) | [Live Demo](https://webterm.app)
+
+<img width="1728" alt="image" src="https://github.com/user-attachments/assets/83cbd4c0-9a87-4c3a-9afd-8542e08a5962">
+
+
+
+
+
 # System Flow
 
 The following diagram illustrates the high-level flow of the system:
