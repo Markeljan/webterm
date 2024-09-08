@@ -1,45 +1,45 @@
-"use client";
-
-import { useEffect, useRef } from "react";
-
-import { isValidCommand } from "@/lib/commands";
-import { terminalConfig } from "@/lib/config";
+import { cn } from "@/lib/utils";
 
 interface InputProps {
+  ps1: string;
   command: string;
-  setCommand: React.Dispatch<React.SetStateAction<string>>;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  validateCommand: (command: string) => boolean;
+  inputRef: React.RefObject<HTMLInputElement>;
 }
 
-export const Input: React.FC<InputProps> = ({ command, handleChange, handleKeyDown }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const parts = command.split(/\s+/);
-  const commandPart = parts[0];
-  const argsPart = parts.slice(1).join(" ");
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
+export const Input: React.FC<InputProps> = ({
+  ps1,
+  command,
+  handleChange,
+  handleKeyDown,
+  validateCommand,
+  inputRef,
+}) => {
+  const [commandName, ...args] = command.split(" ");
 
   return (
-    <div className="flex flex-row space-x-2">
+    <div className="flex flex-col">
       <label htmlFor="prompt" className="flex-shrink text-cyan-400">
-        {`${terminalConfig.ps1_username}@${terminalConfig.ps1_hostname}:$ ~ `}
+        {ps1}
       </label>
-      <div className="flex-grow relative">
-        <span className={isValidCommand(commandPart) ? "text-green-400" : "text-red-400"}>{commandPart}</span>
-        <span className="text-white">{argsPart ? ` ${argsPart}` : ""}</span>
-        <input
-          ref={inputRef}
-          id="prompt"
-          type="text"
-          className="absolute inset-0 w-full bg-transparent outline-none caret-white text-transparent"
-          value={command}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          autoComplete="off"
-        />
+      <div className="flex flex-row space-x-2">
+        <span className="text-green-400">→</span>
+        <div className="flex-grow relative">
+          <span className={cn(validateCommand(commandName) ? "text-green-400" : "text-red-400")}>{commandName}</span>
+          {args ? <span className="text-white"> {args.join(" ")}</span> : null}
+          <input
+            ref={inputRef}
+            id="prompt"
+            type="text"
+            className="absolute inset-0 w-full bg-transparent outline-none text-transparent caret-white"
+            value={command}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            autoComplete="off"
+          />
+        </div>
       </div>
     </div>
   );

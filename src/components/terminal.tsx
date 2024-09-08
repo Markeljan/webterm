@@ -1,67 +1,54 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import { History } from "@/components/history";
 import { Input } from "@/components/input";
-import { useFhenix } from "@/lib/hooks/use-fhenix";
 import { useTerminal } from "@/lib/hooks/use-terminal";
 
 export const Terminal = () => {
-  const { history, command, setCommand, handleChange, handleKeyDown } = useTerminal();
-  const terminalRef = useRef<HTMLDivElement>(null);
-  const [encryptedString, setEncryptedString] = useState<any[]>([]);
-  const { encryptString, addPost, unsealPostLength } = useFhenix();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const historyContainerRef = useRef<HTMLDivElement>(null);
+
+  const { ps1, command, history, handleChange, handleKeyDown, validateCommand } = useTerminal();
 
   useEffect(() => {
     const focusInput = () => {
-      const inputElement = terminalRef.current?.querySelector("input");
-      inputElement?.focus();
+      inputRef.current?.focus();
     };
 
-    focusInput();
-    window.addEventListener("click", focusInput);
+    const handleMouseUp = (e: MouseEvent) => {
+      if (e.button === 0 && !window.getSelection()?.toString()) {
+        focusInput();
+      }
+    };
 
+    document.addEventListener("click", handleMouseUp);
+
+    focusInput();
     return () => {
-      window.removeEventListener("click", focusInput);
+      document.removeEventListener("click", handleMouseUp);
     };
   }, []);
 
+  useEffect(() => {
+    if (historyContainerRef.current) {
+      historyContainerRef.current.scrollTop = historyContainerRef.current.scrollHeight;
+    }
+  }, [history]);
+
   return (
-    <div
-      ref={terminalRef}
-      className="flex flex-col w-full p-8 overflow-hidden h-full border-2 rounded border-yellow-200"
-    >
-      <div className="flex-grow overflow-y-auto mb-4">
+    <div className="flex flex-col w-full p-8 overflow-hidden h-full border-2 rounded border-yellow-200">
+      <div ref={historyContainerRef} className="flex-grow overflow-y-auto mb-4">
         <History history={history} />
-        <Input command={command} setCommand={setCommand} handleChange={handleChange} handleKeyDown={handleKeyDown} />
-        <button
-          onClick={async () => {
-            const res = await encryptString("mark");
-            if (res) {
-              setEncryptedString(res);
-            }
-          }}
-        >
-          Encrypt
-        </button>
-        <button
-          onClick={async () => {
-            await addPost(encryptedString);
-          }}
-        >
-          Add Post
-        </button>
-        <button
-          onClick={async () => {
-            const res = await unsealPostLength();
-            if (res) {
-              console.log(res);
-            }
-          }}
-        >
-          Unseal Post Length
-        </button>
+        <Input
+          ps1={ps1}
+          command={command}
+          handleChange={handleChange}
+          handleKeyDown={handleKeyDown}
+          validateCommand={validateCommand}
+          inputRef={inputRef}
+        />
       </div>
     </div>
   );

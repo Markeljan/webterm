@@ -1,18 +1,22 @@
-# WebTerm
+# WebTerm: Confidential Decentralized File System
+
+ETHGlobal 2024 ETHOnline Hackathon Submission
 
 ## Project Concept
 
 This project implements a decentralized, privacy-preserving file system using Web3 technologies, Fully Homomorphic Encryption (FHE), and IPFS. It provides users with a familiar file system interface while leveraging blockchain for authentication and secure metadata storage, and IPFS for decentralized file storage.
 
-### Key Features:
+## Key Features:
 
-- **Web3 Authentication**: Users connect and sign in using their blockchain wallet.
-- **Privacy-Preserving**: Utilizes FHENIX FHE for encrypting user data on the blockchain.
-- **Decentralized Storage**: Files are stored on IPFS, with encrypted references on the blockchain.
-- **Familiar Interface**: Mimics a traditional file system with directories and files.
-- **Access Control**: Supports both public and private files/directories.
+Web3 Authentication: Users connect and sign in using their blockchain wallet.
+Privacy-Preserving: Utilizes FHENIX FHE for encrypting user data on the blockchain.
+Decentralized Storage: Files are stored on IPFS, with encrypted references on the blockchain.
+Familiar Interface: Mimics a traditional file system with directories and files.
+Access Control: Supports both public and private files/directories.
+Confidential String Storage: Demonstrates encrypted string storage and retrieval.
+Author Verification: Verify content creators without revealing identities.
 
-## System Flow
+# System Flow
 
 The following diagram illustrates the high-level flow of the system:
 
@@ -61,4 +65,4 @@ sequenceDiagram
 - Smart Contract: Solidity
 - Frontend: Next.js
 - Fully Homomorphic Encryption: FHENIXs
-- Decentralized Storage: IPFS
+- Decentralized Storage: IPFS (not implemented)

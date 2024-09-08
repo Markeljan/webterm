@@ -1,113 +1,122 @@
-import { useCallback, useState } from "react";
-import { useAccount, useConnect } from "wagmi";
+import { useCallback, useMemo, useState } from "react";
 
-import { BANNER, commands, isValidCommand } from "@/lib/commands";
-import { fhenix } from "@/lib/config-web3";
+import { useAccount } from "wagmi";
+
+import { useCommands } from "@/lib/hooks/use-commands";
 
 export type HistoryItem = {
-  type: "command" | "output";
   value: string;
+  ps1?: string;
+  isValidCommand?: boolean;
 };
 
+const INITIAL_HISTORY = [
+  {
+    value: "WEBTERM type 'help' to see the list of available commands",
+  },
+];
+
 export const useTerminal = () => {
-  const [history, setHistory] = useState<HistoryItem[]>([{ type: "output", value: BANNER }]);
+  const [history, setHistory] = useState<HistoryItem[]>(INITIAL_HISTORY);
   const [command, setCommand] = useState("");
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-  const { isConnected, address } = useAccount();
-  const { connectors, connect } = useConnect();
+  const [commandHistoryIndex, setCommandHistoryIndex] = useState(-1);
+  const { address, chain } = useAccount();
+  const { commandList, executeCommand, validateCommand } = useCommands();
 
-  const addToHistory = useCallback((item: HistoryItem) => {
-    setHistory((prev) => [...prev, item]);
-    if (item.type === "command" && item.value.trim() !== "") {
-      setCommandHistory((prev) => [...prev, item.value]);
-    }
-    setHistoryIndex(-1);
-  }, []);
+  const ps1 = useMemo(() => {
+    const username = address ? `${address.slice(0, 6)}_${address.slice(-4)}` : "anon";
+    const hostname = chain ? `${chain.name}` : "webterm";
+    return `${username}@${hostname}`.replace(" ", "");
+  }, [address, chain]);
 
-  const clearOutput = useCallback(() => {
-    setHistory([]);
-  }, []);
+  const addToHistory = useCallback(
+    (commandName: string, commandInput: string, output: string) => {
+      setHistory((prev) => [
+        ...prev,
+        { ps1, value: commandInput, isValidCommand: validateCommand(commandName) },
+        ...(commandInput ? [{ value: output }] : []),
+      ]);
+      if (commandInput) setCommandHistory((prev) => [...prev, commandInput]);
+      setCommandHistoryIndex(-1);
+      setCommand("");
+    },
+    [ps1, validateCommand]
+  );
 
   const navigateHistory = useCallback(
-    (direction: "up" | "down") => {
-      if (direction === "up" && historyIndex < commandHistory.length - 1) {
-        const newIndex = historyIndex + 1;
-        setHistoryIndex(newIndex);
+    (key: "ArrowUp" | "ArrowDown") => {
+      if (key === "ArrowUp" && commandHistoryIndex < commandHistory.length - 1) {
+        const newIndex = commandHistoryIndex + 1;
+        setCommandHistoryIndex(newIndex);
         setCommand(commandHistory[commandHistory.length - 1 - newIndex]);
-      } else if (direction === "down" && historyIndex >= 0) {
-        const newIndex = historyIndex - 1;
-        setHistoryIndex(newIndex);
+      } else if (key === "ArrowDown" && commandHistoryIndex >= 0) {
+        const newIndex = commandHistoryIndex - 1;
+        setCommandHistoryIndex(newIndex);
         setCommand(newIndex === -1 ? "" : commandHistory[commandHistory.length - 1 - newIndex]);
       }
     },
-    [commandHistory, historyIndex]
+    [commandHistory, commandHistoryIndex]
   );
 
-  const executeCommand = useCallback(
-    async (cmd: string) => {
-      const trimmedCmd = cmd.trim();
-      if (trimmedCmd === "") {
-        addToHistory({ type: "command", value: "" });
-      } else {
-        addToHistory({ type: "command", value: trimmedCmd });
-        const [commandName, ...args] = trimmedCmd.split(" ");
-        if (commandName === "clear") {
-          clearOutput();
-        } else if (isValidCommand(commandName)) {
-          if (commandName === "connect") {
-            if (!isConnected) {
-              connect({ connector: connectors[0], chainId: fhenix.id });
-              addToHistory({ type: "output", value: "Connecting..." });
-            } else {
-              addToHistory({ type: "output", value: "Already connected." });
-            }
-          } else {
-            const result = await commands[commandName](args);
-            addToHistory({ type: "output", value: result });
-          }
-        } else {
-          addToHistory({ type: "output", value: `command not found: ${commandName}` });
-        }
-      }
-      setCommand("");
-    },
-    [addToHistory, clearOutput, isConnected, connect, connectors]
-  );
-
-  const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setCommand(event.target.value);
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    setCommand(e.target.value);
   }, []);
 
-  const handleTabCompletion = useCallback(() => {
-    const availableCommands = Object.keys(commands).filter((entry) => entry.startsWith(command));
+  const handleClear = useCallback(() => {
+    setCommandHistory((prev) => [...prev, "clear"]);
+    setHistory(INITIAL_HISTORY);
+    setCommand("");
+  }, []);
 
-    if (availableCommands.length === 1) {
-      setCommand(availableCommands[0]);
-    }
-  }, [command]);
+  const handleSubmitCommand = useCallback(async () => {
+    const commandInput = command.trim();
+    const [commandName, ...args] = commandInput.split(" ");
+    if (commandInput === "") return addToHistory(commandName, commandInput, "");
+    if (commandName === "clear") return handleClear();
+    const output = await executeCommand(commandName, args);
+    addToHistory(commandName, commandInput, output);
+  }, [addToHistory, executeCommand]);
+
+  const handleTabCompletion = useCallback(() => {
+    if (command.length === 0) return;
+
+    const commandMatches = commandList
+      .filter((entry) => entry.startsWith(command) && entry !== command)
+      .sort((a, b) => a.length - b.length);
+
+    if (commandMatches.length === 0) return;
+
+    setCommand(commandMatches[0]);
+  }, [command, commandList]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-        navigateHistory(event.key === "ArrowUp" ? "up" : "down");
-      } else if (event.key === "Tab") {
-        event.preventDefault();
-        handleTabCompletion();
-      } else if (event.key === "Enter") {
-        executeCommand(command);
+      switch (event.key) {
+        case "ArrowUp":
+        case "ArrowDown":
+          event.preventDefault();
+          navigateHistory(event.key);
+          break;
+        case "Tab":
+          event.preventDefault();
+          handleTabCompletion();
+          break;
+        case "Enter":
+          handleSubmitCommand();
+          break;
       }
     },
-    [command, executeCommand, navigateHistory, handleTabCompletion]
+    [command, handleSubmitCommand, navigateHistory, handleTabCompletion]
   );
 
   return {
-    history,
+    ps1,
     command,
-    setCommand,
+    history,
     handleChange,
     handleKeyDown,
-    executeCommand,
-    clearOutput,
+    validateCommand,
   };
 };

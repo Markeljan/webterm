@@ -27,17 +27,17 @@ export const fhenix = defineChain({
   testnet: true,
 });
 
-const PROJECT_ID = (() => {
+const projectId = (() => {
   const key = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
   if (!key) {
-    throw new Error("WALLETCONNECT_PROJECT_ID is not set");
+    throw new Error("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set");
   }
   return key;
 })();
 
 export const config = createConfig({
   chains: [fhenix],
-  connectors: [injected(), walletConnect({ projectId: PROJECT_ID }), metaMask(), safe()],
+  connectors: [injected(), walletConnect({ projectId }), metaMask(), safe()],
   transports: {
     [fhenix.id]: http(fhenix.rpcUrls.default.http[0]),
   },

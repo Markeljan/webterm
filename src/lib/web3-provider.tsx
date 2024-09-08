@@ -5,7 +5,7 @@ import { WagmiProvider } from "wagmi";
 
 import { config } from "@/lib/config-web3";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({});
 
 export const Web3Provider = ({ children }: { children: React.ReactNode }) => {
   return (
